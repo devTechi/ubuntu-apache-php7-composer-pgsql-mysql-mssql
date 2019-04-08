@@ -12,13 +12,16 @@ ADD php_composer /usr/local/bin/composer
 ADD run /usr/local/bin/run
 
 RUN apt-get update && \
+  apt-get install -y software-properties-common --no-install-recommends && \
+  LC_ALL=C.UTF-8 add-apt-repository ppa:ondrej/php && \
+  apt-get update && \
   apt-get dist-upgrade -y && \
   apt-get upgrade -y && \
   \
-  # php7.0-dev and others are just needed for building
+  # php7.1-dev and others are just needed for building
   # these packages need to be removed later (because of production, but it is needed for 'pecl'!)
   buildDeps=" \
-  php7.0-dev \
+  php7.1-dev \
   unixodbc-dev \
   " && \
   \
@@ -27,21 +30,21 @@ RUN apt-get update && \
   ca-certificates \
   apache2 \
   mcrypt \
-  libapache2-mod-php7.0 \
-  php7.0 \
-  php7.0-cli \
-  php7.0-gd \
-  php7.0-json \
-  php7.0-ldap \
-  php7.0-mbstring \
-  php7.0-mysql \
-  php7.0-pgsql \
-  # php7.0-sqlite3 \
-  php7.0-xml \
-  php7.0-xsl \
-  php7.0-zip \
-  php7.0-curl \
-  php7.0-mcrypt \
+  libapache2-mod-php7.1 \
+  php7.1 \
+  php7.1-cli \
+  php7.1-gd \
+  php7.1-json \
+  php7.1-ldap \
+  php7.1-mbstring \
+  php7.1-mysql \
+  php7.1-pgsql \
+  # php7.1-sqlite3 \
+  php7.1-xml \
+  php7.1-xsl \
+  php7.1-zip \
+  php7.1-curl \
+  php7.1-mcrypt \
   php-mbstring \
   php-pear \
   curl \
@@ -75,10 +78,10 @@ RUN apt-get update && \
   # configure driver loading
   a2dismod mpm_event && \
   a2enmod mpm_prefork && \
-  a2enmod php7.0 && \
+  a2enmod php7.1 && \
   # add sqlsrv extension info to apache2/php.ini
-  echo "extension=pdo_sqlsrv.so" >> /etc/php/7.0/apache2/conf.d/30-pdo_sqlsrv.ini && \
-  echo "extension=sqlsrv.so" >> /etc/php/7.0/apache2/conf.d/20-sqlsrv.ini && \
+  echo "extension=pdo_sqlsrv.so" >> /etc/php/7.1/apache2/conf.d/30-pdo_sqlsrv.ini && \
+  echo "extension=sqlsrv.so" >> /etc/php/7.1/apache2/conf.d/20-sqlsrv.ini && \
   ############################
   # Cleaning up and change rights of copied/added files
   ############################
