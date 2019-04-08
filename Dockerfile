@@ -1,13 +1,10 @@
-FROM ubuntu:18.04
+FROM ubuntu:16.04
 
 LABEL maintainer="devTechi <devT3chi@gmail.com>"
 
 ENV PATH $PATH:/root/.composer/vendor/bin
 ENV DOCUMENT_ROOT /var/www/html
 ENV PORT 80
-## for apt to be noninteractive
-ENV DEBIAN_FRONTEND noninteractive
-ENV DEBCONF_NONINTERACTIVE_SEEN true
 
 # add composer wrapper
 ADD php_composer /usr/local/bin/composer
@@ -15,46 +12,42 @@ ADD php_composer /usr/local/bin/composer
 ADD run /usr/local/bin/run
 
 RUN apt-get update && \
-  apt-get install -y software-properties-common && \
-  add-apt-repository ppa:ondrej/php -y && \
-  apt-get update && \
-  apt-get install -y tzdata && \
   apt-get dist-upgrade -y && \
   apt-get upgrade -y && \
   \
-  # php7.3-dev and others are just needed for building;
+  # php7.0-dev and others are just needed for building
+  # these packages need to be removed later (because of production, but it is needed for 'pecl'!)
   buildDeps=" \
-  php7.3-dev \
+  php7.0-dev \
   unixodbc-dev \
-  libmcrypt-dev \
   " && \
   \
-  apt-get install -y --allow-unauthenticated \
+  apt-get install -y \
   apt-transport-https \
   ca-certificates \
   apache2 \
   mcrypt \
-  libapache2-mod-php7.3 \
-  libssl1.0.0 \
-  php7.3 \
-  php7.3-cli \
-  php7.3-gd \
-  php7.3-json \
-  php7.3-ldap \
-  php7.3-mbstring \
-  php7.3-mysql \
-  php7.3-pgsql \
-  # php7.3-sqlite3 \
-  php7.3-xml \
-  php7.3-xsl \
-  php7.3-zip \
-  php7.3-curl \
+  libapache2-mod-php7.0 \
+  php7.0 \
+  php7.0-cli \
+  php7.0-gd \
+  php7.0-json \
+  php7.0-ldap \
+  php7.0-mbstring \
+  php7.0-mysql \
+  php7.0-pgsql \
+  # php7.0-sqlite3 \
+  php7.0-xml \
+  php7.0-xsl \
+  php7.0-zip \
+  php7.0-curl \
+  php7.0-mcrypt \
   php-mbstring \
   php-pear \
   curl \
   --no-install-recommends && \
   \
-  apt-get install -y --allow-unauthenticated \
+  apt-get install -y \
   $buildDeps && \
   \
   # Next composer and global composer package, as their versions may change from time to time
@@ -66,8 +59,8 @@ RUN apt-get update && \
   # see: SQL Server instructions here: https://docs.microsoft.com/en-us/sql/connect/php/installation-tutorial-linux-mac?view=sql-server-2017#installing-the-drivers-on-ubuntu-1604-1710-and-1804
   ############################
   curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
-  #Ubuntu 18.04
-  curl https://packages.microsoft.com/config/ubuntu/18.04/prod.list > /etc/apt/sources.list.d/mssql-release.list && \
+  #Ubuntu 16.04
+  curl https://packages.microsoft.com/config/ubuntu/16.04/prod.list > /etc/apt/sources.list.d/mssql-release.list && \
   apt-get update && \
   ACCEPT_EULA=Y apt-get install -y mssql-tools msodbcsql17 && \
   \
@@ -82,10 +75,10 @@ RUN apt-get update && \
   # configure driver loading
   a2dismod mpm_event && \
   a2enmod mpm_prefork && \
-  a2enmod php7.3 && \
-  # add sqlsrv extension info to apache2-php.ini
-  echo "extension=pdo_sqlsrv.so" >> /etc/php/7.3/apache2/conf.d/30-pdo_sqlsrv.ini && \
-  echo "extension=sqlsrv.so" >> /etc/php/7.3/apache2/conf.d/20-sqlsrv.ini && \
+  a2enmod php7.0 && \
+  # add sqlsrv extension info to apache2/php.ini
+  echo "extension=pdo_sqlsrv.so" >> /etc/php/7.0/apache2/conf.d/30-pdo_sqlsrv.ini && \
+  echo "extension=sqlsrv.so" >> /etc/php/7.0/apache2/conf.d/20-sqlsrv.ini && \
   ############################
   # Cleaning up and change rights of copied/added files
   ############################
@@ -93,8 +86,7 @@ RUN apt-get update && \
   chmod +x /usr/local/bin/run && \
   a2enmod rewrite && \
   apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $buildDeps && \
-  ## cleanup of files from setup
-  rm -r /var/lib/apt/lists/* /tmp/*
+  rm -r /var/lib/apt/lists/*
 
 # Apache config
 ADD apache2.conf /etc/apache2/apache2.conf
