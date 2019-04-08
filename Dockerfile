@@ -18,13 +18,11 @@ RUN apt-get update && \
   apt-get install -y software-properties-common && \
   add-apt-repository ppa:ondrej/php -y && \
   apt-get update && \
-  ## see: https://stackoverflow.com/a/47909037
   apt-get install -y tzdata && \
   apt-get dist-upgrade -y && \
   apt-get upgrade -y && \
   \
   # php7.3-dev and others are just needed for building;
-  # these packages need to be removed later (because of production, but it is needed for 'pecl'!)
   buildDeps=" \
   php7.3-dev \
   unixodbc-dev \
@@ -51,7 +49,6 @@ RUN apt-get update && \
   php7.3-xsl \
   php7.3-zip \
   php7.3-curl \
-  # php7.0-mcrypt \ ## depcrecated
   php-mbstring \
   php-pear \
   curl \
@@ -72,9 +69,6 @@ RUN apt-get update && \
   #Ubuntu 18.04
   curl https://packages.microsoft.com/config/ubuntu/18.04/prod.list > /etc/apt/sources.list.d/mssql-release.list && \
   apt-get update && \
-  # verify with
-  # ldd /opt/microsoft/msodbcsql17/lib64/libmsodbcsql-17.3.so.1.1
-  # ldconfig -p | grep libssl
   ACCEPT_EULA=Y apt-get install -y mssql-tools msodbcsql17 && \
   \
   echo 'PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bash_profile && \
@@ -110,5 +104,3 @@ WORKDIR /var/www/html
 #EXPOSE 80
 
 CMD ["/usr/local/bin/run"]
-
-## to keep the image as small as possible try to use just ONE 'RUN' command
